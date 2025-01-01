@@ -1,44 +1,45 @@
 pipeline {
     agent any
     stages {
-        stage ('Pull Code') {
+        stage ('pull') {
             steps {
-                git 'https://github.com/SurajBele/studentapp.ui.git'
-                echo 'Pull successful'
+               git 'https://github.com/SurajBele/studentapp.ui.git'
+               echo 'pull sucessful'
             }
-        }
+         }
         
-        stage ('Build') {
+         stage ('build') {
             steps {
-                sh 'mvn clean package'
-                echo 'Build successful'
+               sh 'mvn clean package'
+               echo 'build sucessful'
             }
-        }
-        
-        stage ('Test') {
+         }
+         
+         stage ('test') {
             steps {
-                sh '''
+              sh '''
                     mvn clean verify sonar:sonar \
                     -Dsonar.projectKey=first-try \
                     -Dsonar.host.url=http://34.204.40.70:9000 \
                     -Dsonar.login=sqp_40b5a607c6de7707a39fb43b71ad5ce0a7efe415
                 '''
-                echo 'Test successful'
+              
+                  echo 'test sucessful'
+               }   
             }
-        }
-        
-        stage ('Quality Gate') {
+         }
+         stage ('iftesting_fails'){
+            steps{
+               waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+            
+            }
+         }
+         stage ('deploy-tomcat'){
             steps {
-                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
-                echo 'Quality Gate passed'
+               deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://50.18.36.86:8080/')], contextPath: '/', war: '**/*.war'
+               echo 'deploy successful' 
             }
-        }
-        
-        stage ('Deploy to Tomcat') {
-            steps {
-                deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://50.18.36.86:8080/')], contextPath: '/', war: '**/*.war'
-                echo 'Deploy successful'
-            }
-        }
+         }
+      
     }
 }
