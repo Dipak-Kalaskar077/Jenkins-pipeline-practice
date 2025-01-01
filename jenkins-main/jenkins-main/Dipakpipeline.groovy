@@ -19,9 +19,9 @@ pipeline {
             steps {
                 sh '''
                     mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=first-try \
+                    -Dsonar.projectKey=studentapp.ui \
                     -Dsonar.host.url=http://34.204.40.70:9000 \
-                    -Dsonar.login=sqp_40b5a607c6de7707a39fb43b71ad5ce0a7efe415
+                    -Dsonar.login=sqp_cf77d07f749142f0375cd7462e379c204ed86d23
                 '''
                 echo 'Test successful'
             }
