@@ -1,46 +1,44 @@
 pipeline {
     agent any
     stages {
-        stage ('pull') {
+        stage ('Pull Code') {
             steps {
-               git 'https://github.com/SurajBele/studentapp.ui.git'
-               echo 'pull sucessful'
+                git 'https://github.com/SurajBele/studentapp.ui.git'
+                echo 'Pull successful'
             }
-         }
+        }
         
-         stage ('build') {
+        stage ('Build') {
             steps {
-               sh 'mvn clean package'
-               echo 'build sucessful'
+                sh 'mvn clean package'
+                echo 'Build successful'
             }
-         }
-         
-         stage ('test') {
+        }
+        
+        stage ('Test') {
             steps {
-              sh '''
+                sh '''
                     mvn clean verify sonar:sonar \
                     -Dsonar.projectKey=first-try \
                     -Dsonar.host.url=http://34.204.40.70:9000 \
                     -Dsonar.login=sqp_40b5a607c6de7707a39fb43b71ad5ce0a7efe415
                 '''
-              
-                  echo 'test sucessful'
-               }   
+                echo 'Test successful'
             }
-         }
-         stage ('iftesting_fails'){
-            steps{
-              // waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
-                echo "Quality Test Success"
-            
-            }
-         }
-         stage ('deploy-tomcat'){
+        }
+        
+        stage ('Quality Gate') {
             steps {
-               // deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://50.18.36.86:8080/')], contextPath: '/', war: '**/*.war'
-               echo 'deploy successful' 
+                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                echo 'Quality Gate passed'
             }
-         }
-      
+        }
+        
+        stage ('Deploy to Tomcat') {
+            steps {
+                deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://50.18.36.86:8080/')], contextPath: '/', war: '**/*.war'
+                echo 'Deploy successful'
+            }
+        }
     }
 }
